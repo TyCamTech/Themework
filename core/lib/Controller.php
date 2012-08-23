@@ -2,10 +2,10 @@
 /**
  * Controller
  * 
- * @package local - framework
+ * @package ThemeWork
  * @author Stuart Duncan
  * @copyright 2012
- * @version $Id$
+ * @version 0.1
  * @access public
  */
 class Controller {
@@ -18,7 +18,7 @@ class Controller {
 	/** $this->set(name, value) puts information into $this->_variables for use in the views **/
 	private $_variables = array();
 
-	public $config = array();
+	public $_config = array();
 
 	/**
 	 * Controller::__construct()
@@ -34,6 +34,8 @@ class Controller {
 
 		// load the default config file, if there is one.
 		$this->loadConfig();
+
+		$this->loadDB();
 	}
 
 	/**
@@ -46,32 +48,62 @@ class Controller {
 		return self::$instance;
 	}
 
+
+	/**
+	 * Controller::loadConfig()
+	 * Loads a config file. Defaults to config.php but can load any config file.
+	 * Dumps $config[] array items into $this->config[$key] = $item;
+	 * 
+	 * @param string $file
+	 * @return mixed
+	 */
 	public function loadConfig($file = 'config'){
 		// Path to the config file to load
-		$path = APP_PATH . 'config' . DS . $file . '.php';
+		if( file_exists(APP_PATH . 'config' . DS . $file . '.php') ){
+			$path = APP_PATH . 'config' . DS . $file . '.php';
+		}
+		elseif( file_exists(CORE_PATH . 'default' . DS . $file . '.php')){
+			$path = CORE_PATH . 'default' . DS . $file . '.php';
+		}
 
-		// If the file exists, continue on.
-		if( file_exists($path) ){
-			require_once($path);
-			if( is_array($config) ){
-				foreach( $config as $key => $item ){
-					$this->config[$key] = $item;
-				}
-			}
-			else {
-				$this->config[] = $config;
+		// No path to no file? Fail out.
+		if( empty($path) ){
+			$C = get_instance();
+			$C->error('Unable to find config file: ' . $file . '.php');
+		}
+
+		// Require once to ensure we don't grab it a second time
+		require_once($path);
+
+		// Dump values into $this->_config
+		if( is_array($config) ){
+			foreach( $config as $key => $item ){
+				$this->_config[$key] = $item;
 			}
 		}
 		else {
-			return false;
+			$this->_config[] = $config;
 		}
 
 		return true;
 	}
 
+	public function loadDB($file = 'database'){
+		return true;
+	}
+
+	/**
+	 * Controller::error()
+	 * Display's an error message via the Error.php library
+	 * 
+	 * @param string $msg
+	 * @param integer $status
+	 * @return void
+	 */
 	public function error($msg = '', $status = 404){
 		$this->load->library('error');
 		$this->error->show($msg, $status);
+		exit;
 	}
 
 	/**
@@ -81,7 +113,12 @@ class Controller {
 	 * @return void
 	 */
 	public function index(){
+
+		// If we're loading this, then we're displaying the default page. So do some checks!
+		$this->set('config_exists', file_exists(APP_CONFIG_PATH . 'config.php'));
+
 		$this->set('output', 'Hello World!');
+		$this->set('pageTitle', config('site_name') . ' | ' . config('tag_line'));
 		$this->setTheme('default');
 		$this->view('index');
 	}

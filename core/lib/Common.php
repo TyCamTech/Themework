@@ -16,8 +16,8 @@ if( !function_exists('config') ){
 			$C->loadConfig($file);
 		}
 
-		if( !empty($C->config[$line]) ){
-			return $C->config[$line];
+		if( !empty($C->_config[$line]) ){
+			return $C->_config[$line];
 		}
 		else {
 			return false;
@@ -60,10 +60,11 @@ if( !function_exists('js') ){
 	function js($js){
 		$output = null;
 
-		if( empty($js) ){
-			$js = $CI->js;
-			$CI =& get_instance();
-		}
+		// Get instance of the controller
+		$C =& get_instance();
+
+		// Retrieves the set theme
+		$theme = $C->getTheme();
 
 		if( is_array($js) ){
 			foreach( $js as $j ){
@@ -71,7 +72,7 @@ if( !function_exists('js') ){
 					$output.= '<script type="text/javascript" src="' . $j . '"></script>' . "\n";
 				}
 				else {
-					$output.= '<script type="text/javascript" src="/js/' . $j . '.js"></script>' . "\n";
+					$output.= '<script type="text/javascript" src="' . site_url('app/theme/' . $theme . '/js/' . $j . '.js') . '"></script>' . "\n";
 				}
 			}
 		}
@@ -80,7 +81,7 @@ if( !function_exists('js') ){
 				$output.= '<script type="text/javascript" src="' . $js . '"></script>' . "\n";
 			}
 			else {
-				$output.= '<script type="text/javascript" src="/js/' . $js . '.js"></script>' . "\n";
+				$output.= '<script type="text/javascript" src="' . site_url('app/theme/' . $theme . '/js/' . $js . '.js') . '"></script>' . "\n";
 			}
 		}
 	    echo $output;
@@ -110,7 +111,7 @@ if( !function_exists('css') ){
 					$output.= '<link type="text/css" href="' . $c . '" rel="stylesheet" />' . "\n";
 				}
 				else {
-					$output.= '<link type="text/css" href="/' . $theme . '/css/' . $c . '.css" rel="stylesheet" />' . "\n";
+					$output.= '<link type="text/css" href="' . site_url('app/theme/' . $theme . '/css/' . $c . '.css') . '" rel="stylesheet" />' . "\n";
 				}
 			}
 		}
@@ -119,7 +120,7 @@ if( !function_exists('css') ){
 				$output.= '<link type="text/css" href="' . $css . '" rel="stylesheet" />' . "\n";
 			}
 			else {
-				$output.= '<link type="text/css" href="' . site_url() . 'app/theme/' . $theme . '/css/' . $css . '.css" rel="stylesheet" />' . "\n";
+				$output.= '<link type="text/css" href="' . site_url('app/theme/' . $theme . '/css/' . $css . '.css') . '" rel="stylesheet" />' . "\n";
 			}
 		}
 	    echo $output;

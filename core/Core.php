@@ -1,4 +1,14 @@
 <?php
+// Constants
+define('VERSION', 0.1);
+
+// More paths, based off the paths set in index.php
+define('APP_CONFIG_PATH', APP_PATH . 'config' . DS);
+define('APP_LIBRARY_PATH', APP_PATH . 'library' . DS);
+define('APP_MODEL_PATH', APP_PATH . 'model' . DS);
+define('CORE_DEFAULT_PATH', CORE_PATH . 'default' . DS);
+define('CORE_LIB_PATH', CORE_PATH . 'lib' . DS);
+
 // This must be included at the top to start the ball rolling on everything else.
 require_once( CORE_PATH . 'lib' . DS . 'Common.php');
 
@@ -9,9 +19,6 @@ load_file('config'.DS.'constants');
 load_file('lib'.DS.'Load', 'core');
 load_file('lib'.DS.'Controller', 'core');
 
-// Constants
-define('VERSION', 0.1);
-
 // Controller instance
 function &get_instance(){
 	return Controller::getInstance();
@@ -20,10 +27,10 @@ function &get_instance(){
 /**
  * Core
  * 
- * @package framework
+ * @package ThemeWork
  * @author Stuart Duncan
  * @copyright 2012
- * @version $Id$
+ * @version .1
  * @access public
  */
 class Core {
@@ -60,8 +67,24 @@ class Core {
 			$path_to_file = CORE_PATH . 'lib' . DS . $controller . '.php';
 		}
 
-		// Include the controller one time.
+		// If no path to file, it was not found. Error out.
+		if( empty($path_to_file) ){
+			// Default it back to the core controller to show the error.
+			$c = 'Controller';
+			$c = new $c();
+			$c->error('Unable to locate controller file: ' . $controller . '.php');
+		}
+
+		// Since file was found, include it
 		require_once($path_to_file);
+
+		// File was found but no class exists, error out
+		if( !class_exists($controller) ){
+			// Default it back to the core controller to show the error.
+			$c = 'Controller';
+			$c = new $c();
+			$c->error('Unable to load class: ' . $controller);
+		}
 
 		// Create the controller object so that we can use it's views for errors
 		$dispatch = new $controller();
@@ -71,7 +94,7 @@ class Core {
 			call_user_func(array($dispatch, $method), $url);
 		}
 		else {
-			$dispatch->_error('Unable to find method');
+			$dispatch->error('Unable to find method <strong>' . ucfirst($controller) . '::' . $method . '</strong>', 404);
 		}
 	}
 }

@@ -29,6 +29,17 @@ class Load {
 	}
 
 
+	public function model($file = '', $object_name = ''){
+		$C =& get_instance();
+		if( !empty($object_name) ){
+			$C->$object_name = $this->_load('model', $file);
+		}
+		else {
+			$C->$file = $this->_load('model', $file);
+		}
+	}
+
+
 	public function config($file){
 		
 	}
@@ -46,15 +57,18 @@ class Load {
 		$path = null;
 		$file = ucfirst($file);
 
+		// Find desired file
 		if( file_exists(APP_PATH . $type . DS . $file . '.php') ){
 			$path = APP_PATH . $type . DS . $file . '.php';
 		}
 		elseif( file_exists(CORE_PATH . 'lib' . DS . $file . '.php') ){
 			$path = CORE_PATH . 'lib' . DS .  $file . '.php';
 		}
-		else {
-			# error!
-			pr('error');
+
+		// If path is empty, the file was not found
+		if( empty($path) ){
+			$C = get_instance();
+			$C->error('Unable to find ' . $type . '/' . $file . '.php');
 		}
 
 		// Include the file
