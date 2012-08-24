@@ -5,7 +5,6 @@
  * @package ThemeWork
  * @author Stuart Duncan
  * @copyright 2012
- * @version 0.1
  * @access public
  */
 class Controller {
@@ -18,7 +17,14 @@ class Controller {
 	/** $this->set(name, value) puts information into $this->_variables for use in the views **/
 	private $_variables = array();
 
+	/** Config lines placeholder **/
 	public $_config = array();
+
+	/** Holds boolean on whether or not database file exists **/
+	private $_database_file_exists = false;
+
+	/** Database lines placeholder - Holds info from /app/config/database.php **/
+	public $_database = array();
 
 	/**
 	 * Controller::__construct()
@@ -27,6 +33,7 @@ class Controller {
 	 * @return void
 	 */
 	public function __construct(){
+		Log_Message('Loaded', 'Controller loaded');
 		self::$instance =& $this;
 
 		// Load the load class
@@ -35,7 +42,9 @@ class Controller {
 		// load the default config file, if there is one.
 		$this->loadConfig();
 
-		$this->loadDB();
+		// Check for theme dependent config file
+		// Because this is called after the primary config, this one can override variables set in the first one.
+		$this->loadThemeConfig();
 	}
 
 	/**
@@ -76,7 +85,7 @@ class Controller {
 		require_once($path);
 
 		// Dump values into $this->_config
-		if( is_array($config) ){
+		if( !empty($config) && is_array($config) ){
 			foreach( $config as $key => $item ){
 				$this->_config[$key] = $item;
 			}
@@ -85,11 +94,41 @@ class Controller {
 			$this->_config[] = $config;
 		}
 
+		Log_Message('Config Loaded', $this->_config);
+
 		return true;
 	}
 
-	public function loadDB($file = 'database'){
-		return true;
+	/**
+	 * Controller::loadThemeConfig()
+	 * Checks for a config file in the active theme folder.
+	 * If found, it adds it's values to the $_config variable.
+	 * Can override existing config values found in /app/config/config.php
+	 * 
+	 * @return void
+	 */
+	private function loadThemeConfig(){
+		// Get the active theme name
+		$theme = config('theme');
+		if( empty($theme) ) $theme = 'default';
+
+		// Build path to file
+		$path = APP_THEME_PATH . $theme . DS . 'config.php';
+
+		// If the file exists, grab it's contents
+		if( file_exists($path) ){
+			require_once($path);
+
+			if( !empty($config) ){
+				// Because we already have an existing $_config, we need to loop over this one
+				// To ensure that it's not reseting it and only overriding it.
+				foreach( $config as $key => $value ){
+					$this->_config[$key] = $value;
+				}
+
+				Log_Message('Theme Config Loaded', $config);
+			}
+		}
 	}
 
 	/**
@@ -117,9 +156,33 @@ class Controller {
 		// If we're loading this, then we're displaying the default page. So do some checks!
 		$this->set('config_exists', file_exists(APP_CONFIG_PATH . 'config.php'));
 
-		$this->set('output', 'Hello World!');
+		## DATABASE ##
+		// Set whether or not the user had set up any information in the database file
+		$db_user = config('db_user');
+		$db_set = ( empty($db_user) ) ? false : true;
+		$this->set('database_set', $db_set);
+
+		// Include the model file. This is not always required, but on the default display page, we need to test the connection
+		require_once(CORE_LIB_PATH . 'Model.php');
+		$model = new Model();
+
+		// Test for a valid connection
+		$db_user = config('db_user');
+		if( !empty($db_user) ){
+			$db_conn = $model->connect();
+			$db_connect = ( $db_conn === false ) ? false : true;
+			$this->set('database_connection', $db_connect);
+		}
+		## END DATABASE CHECK ##
+
+		// Display page
+		$this->set('output', '<strong>Congratulations! And welcome to ThemeWork!</strong>');
 		$this->set('pageTitle', config('site_name') . ' | ' . config('tag_line'));
+
+		// Force theme as this is the main theme for ThemeWork
 		$this->setTheme('default');
+
+		// Render page
 		$this->view('index');
 	}
 
@@ -171,6 +234,7 @@ class Controller {
 
 		// _variables is set using $this->set(name, value) and extracted here
 		extract($this->_variables);
+		Log_Message('Variables passed to view', $this->_variables);
 
 		// Now check for the theme, in app and core
 		if( is_dir(APP_PATH . 'theme' . DS . $this->_theme) ){
@@ -209,6 +273,34 @@ class Controller {
 			else {
 				require_once($view);
 			}
+			Log_Message('Theme set', $this->_theme);
+			Log_Message('View called', $view);
+		}
+
+		// If debugging is enabled, show the logs
+		if( config('debug') && function_exists('json_encode') ){
+			// Retrieves the logs and outputs them.
+			//TODO:Have to make this look awesome. Maybe JS pretty?
+			$log = Log::getResult();
+
+			// PHP version 5.3+ has JSON_FORCE_OBJECT which is FAR superior to (object) casting.
+			// Therefore, older versions of PHP will not have proper debugging 
+			if( defined('JSON_FORCE_OBJECT') ){
+				$json = json_encode($log, JSON_FORCE_OBJECT);
+			}
+			else {
+				$json = json_encode((object)$log);
+			}
+			echo '
+			<div id="ThemeWord_debug" class="container" style="margin: 20px auto 50px auto;"></div>
+			<script src=\'' . config('base_url') . 'core/default/js/prettyPrint.js\'></script>
+			<script>
+			var randomObject = ' . $json . ';
+    		var ppTable = prettyPrint(randomObject, {maxDepth: 10}), debug = document.getElementById(\'ThemeWord_debug\');
+    		debug.innerHTML = \'\';
+    		debug.appendChild(ppTable);
+    		</script>
+ 			';
 		}
 	}
 }

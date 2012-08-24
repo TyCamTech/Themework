@@ -1,8 +1,3 @@
-.2
-- Added error checking in routing. Fail on no controller file. Fail on no class within controller file.
-- Added core config.php file to ensure default settings.
-- Added more defined app and core paths in Core.php for easier file finding later.
-- Updated: Better and more efficient config loading.
-- Updated default index.php and error.php files to be more presentable.
+.2 Added error checking in routing. Fail on no controller file. Fail on no class within controller file.
 
 .1 New Framework begins!

@@ -174,3 +174,20 @@ if( !function_exists('site_url') ){
 		return $url;
 	}
 }
+
+if( !function_exists('Log_Message') ){
+	function Log_Message($key = '', $value = ''){
+		// Include it, one time only
+		require_once(CORE_LIB_PATH . 'Log.php');
+
+		$L = Log::getInstance();
+		if( empty($L) ){
+			$L = new Log();
+		}
+
+		// If this is a string, add a line break for formatting later
+		if( is_string($value) ){ $value .= "\n"; }
+
+		Log::add($key, $value);
+	}
+}

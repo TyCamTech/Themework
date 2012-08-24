@@ -1,19 +1,19 @@
 <?php
 // Constants
+// Version. I'll start changing this once I have a framework that can actually be used, even if it's crappy.
 define('VERSION', 0.1);
 
 // More paths, based off the paths set in index.php
 define('APP_CONFIG_PATH', APP_PATH . 'config' . DS);
 define('APP_LIBRARY_PATH', APP_PATH . 'library' . DS);
+define('APP_CONTROLLER_PATH', APP_PATH . 'controller' . DS);
 define('APP_MODEL_PATH', APP_PATH . 'model' . DS);
+define('APP_THEME_PATH', APP_PATH . 'theme' . DS);
 define('CORE_DEFAULT_PATH', CORE_PATH . 'default' . DS);
 define('CORE_LIB_PATH', CORE_PATH . 'lib' . DS);
 
 // This must be included at the top to start the ball rolling on everything else.
 require_once( CORE_PATH . 'lib' . DS . 'Common.php');
-
-// Files to load - First for client's APP
-load_file('config'.DS.'constants');
 
 // Files to load - part of core
 load_file('lib'.DS.'Load', 'core');
@@ -30,7 +30,6 @@ function &get_instance(){
  * @package ThemeWork
  * @author Stuart Duncan
  * @copyright 2012
- * @version .1
  * @access public
  */
 class Core {
@@ -41,6 +40,7 @@ class Core {
 	public function __construct(){
 		// Core URL path
 		$this->url = (!empty($_GET['url'])) ? $_GET['url'] : null;
+		Log_Message('URL Called', $this->url);
 	}
 
 	/**
@@ -54,6 +54,7 @@ class Core {
 	public function _route(){
 		// define url
 		$url = ( !empty($_GET['url']) ) ? explode('/', $_GET['url']) : null;
+		Log_Message('URL Parameters Received', $url);
 
 		// If not in the url, set defaults. Otherwise grab from url
 		$controller = ( !empty($url[0]) ) ? $url[0] : 'Controller';
@@ -72,7 +73,7 @@ class Core {
 			// Default it back to the core controller to show the error.
 			$c = 'Controller';
 			$c = new $c();
-			$c->error('Unable to locate controller file: ' . $controller . '.php');
+			$c->error('Unable to locate controller file: /controller/' . $controller . '.php');
 		}
 
 		// Since file was found, include it
@@ -91,6 +92,7 @@ class Core {
 
 		// Ensure that the method exists and then try to load it
 		if( method_exists($controller, $method) ){
+			Log_Message('Routing Dispatched', $controller . '/' . $method);
 			call_user_func(array($dispatch, $method), $url);
 		}
 		else {
