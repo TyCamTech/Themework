@@ -21,7 +21,6 @@ class Log {
 	 * @return void
 	 */
 	public function __construct(){
-		self::add('Loaded', __CLASS__);
 		self::$instance =& $this;
 	}
 
@@ -40,7 +39,12 @@ class Log {
 		if( !defined('JSON_FORCE_OBJECT') && is_array($value) ){ $value = (object)$value; }
 
 		// Add to result array
-		self::$result[$key] = $value;
+		if( !empty(self::$result[$key]) ){
+			self::$result[$key] .= ', ' . $value;
+		}
+		else {
+			self::$result[$key] = $value;
+		}
 	}
 
 	/**

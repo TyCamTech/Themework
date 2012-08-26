@@ -3,11 +3,8 @@
 <head>
 <title><?php pr($pageTitle); ?></title>
 <?php
-js(array(
-	'http://code.jquery.com/jquery-latest.min.js',
-	'http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js'
-));
-css('http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css');
+js();
+css();
 ?>
 <style>
 h1 {
@@ -33,7 +30,7 @@ span, p {
 	<h1><span class="large">Theme</span>Work</h1>
 	<h6>A lightweight, highly theme / skinable MVC php framework</h6>
 
-	<p><?php pr($output); ?></p>
+	<p><strong>Congratulations! And welcome to ThemeWork!</strong></p>
 	<p>ThemeWork is the first PHP Framework that delivers easy to use theming options. Views are separated by themes right from the start but more importantly than that, you can be up and running with JQuery, Moo Tools, JQuery-UI, Bootstrap and other JS/CSS frameworks with a simple setting in your config! It's all handled for you. OR, you can leave them out and build your own.</p>
 	<p><strong>What you do with ThemeWork is up to you!</strong></p>
 	<p>You can actually start working with <strong>ThemeWork</strong> right away without fixing any of the warnings below! It's ready to go!<br />
@@ -41,12 +38,24 @@ span, p {
 	<p>Now for the checklist:</p>
 
 	<h3>Configuration</h3>
-	<?php if( $config_exists ): ?>
+	<h4>App Config</h4>
+	<?php if( $app_config ): ?>
 	<p class="alert-success" style="padding: 3px;"><span class="icon-check" style="padding: 3px;"></span>Your config.php file looks great!</p>
 	<?php else: ?>
-	<p class="alert-info" style="padding: 3px;"><span class="icon-flag" style="padding: 3px;"></span>It looks like you're missing your <em><?php pr(APP_CONFIG_PATH); ?>config.php</em> file.</p>
-	<p><strong>ThemeWork</strong> has a core config file, which it is pulling from now, but to use your own configuration settings, you must create a file in your /app/config/ folder called config.php.<br />
-	You can create more config files, if you wish to separate your configuration settings and call them independently as well.</p>
+	<p class="alert-info" style="padding: 3px;"><span class="icon-flag" style="padding: 3px;"></span>It looks like you're missing your <em>/app/config/config.php</em> file.</p>
+	This framework will actually run quite fine without it, as it comes with it's own core configuration options that should work just fine. But to ensure that your code runs as efficiently and properly as it should, you should consider creating your own config.php file.
+	<?php endif; ?>
+	<h4>Theme Config</h4>
+	<?php if( $theme_config): ?>
+	<p class="alert-success"><span class="icon-check"></span>Your theme has it's own 'theme specific' config file! Good work!</p>
+	<?php else: ?>
+	<p class="alert-info"><span class="icon-flag"></span>Your theme does not currently have it's own config.php file.</p>
+	<p>You do not need a config file for your theme but it is good practice to have one. This comes with a LOT of added benefits, for example:
+	<ul>
+	<li>Each theme can have it's own database set up.</li>
+	<li>Each theme can have it's own settings such as pagination counts</li>
+	<li>Each theme can enable and disable specific settings, such as debugging</li>
+	</ul></p>
 	<?php endif; ?>
 
 	<h3>Database</h3>
@@ -63,6 +72,9 @@ span, p {
 		<p>You have not yet set up your database information. This is actually fine if you do not intend to use a database or if you plan on implementing it another way.<br />
 		But if you do plan on using the database, now would be a good time to set up the information in <em><?php pr(APP_CONFIG_PATH); ?>config.php</em></p>
 	<?php endif; ?>
+
+	<h3>Features</h3>
+	<p>If you want to see some of the main features of this framework, which set it apart from all the others, <a href="<?php pr(site_url('features')); ?>">click here</a>.</p>
 </div>
 </body>
 </html>

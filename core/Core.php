@@ -15,9 +15,16 @@ define('CORE_LIB_PATH', CORE_PATH . 'lib' . DS);
 // This must be included at the top to start the ball rolling on everything else.
 require_once( CORE_PATH . 'lib' . DS . 'Common.php');
 
+// Files to load - First for client's APP
+require_once(APP_PATH . 'config/constants.php');
+
 // Files to load - part of core
-load_file('lib'.DS.'Load', 'core');
-load_file('lib'.DS.'Controller', 'core');
+require_once(CORE_LIB_PATH . 'Load.php');
+require_once(CORE_LIB_PATH . 'Controller.php');
+
+if( file_exists(APP_PATH . 'core' . DS . 'my_controller.php') ){
+	require_once(APP_PATH . 'core' . DS . 'my_controller.php');
+}
 
 // Controller instance
 function &get_instance(){
@@ -72,7 +79,7 @@ class Core {
 		if( empty($path_to_file) ){
 			// Default it back to the core controller to show the error.
 			$c = 'Controller';
-			$c = new $c();
+			$c = load_class($c);
 			$c->error('Unable to locate controller file: /controller/' . $controller . '.php');
 		}
 
@@ -83,12 +90,12 @@ class Core {
 		if( !class_exists($controller) ){
 			// Default it back to the core controller to show the error.
 			$c = 'Controller';
-			$c = new $c();
+			$c = load_class($c);
 			$c->error('Unable to load class: ' . $controller);
 		}
 
 		// Create the controller object so that we can use it's views for errors
-		$dispatch = new $controller();
+		$dispatch = load_class($controller);
 
 		// Ensure that the method exists and then try to load it
 		if( method_exists($controller, $method) ){

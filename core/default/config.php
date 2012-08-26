@@ -8,8 +8,9 @@ $config['theme'] = 'default';
 
 /**
  * Path and URL information
+ * Please be sure to add a trailing slash to your URLs!
  **/
-$config['base_url'] = 'http://localhost/framework/';
+$config['base_url'] = 'http://localhost/ThemeWork/';
 
 /**
  * Turn debugging output on and off.
@@ -29,4 +30,16 @@ $config['db_database'] = '';
 # Name and Tagline - kind of like Wordpress
 $config['site_name'] = 'ThemeWork';
 $config['tag_line'] = 'A lightweight, highly theme / skinable MVC php framework';
-?>
+
+/** Auto Inject JS/CSS Frameworks
+ * 
+ * For auto injection to work, you MUST HAVE the js() and css() tags in your templates.
+ * It doesn't matter if you add your own params to those functions. They must be there.
+ * 
+Available frameworks?
+JS:
+	Angular
+	JQuery
+	MooTools
+ **/
+$config['auto_inject_package'] = 'Bootstrap';

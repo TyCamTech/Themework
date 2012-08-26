@@ -18,8 +18,9 @@ class Model {
 	 * @param string $driver
 	 * @return void
 	 */
-	public function __construct($driver = 'MySQL'){
-		Log_Message('Loaded', 'Model');
+	public function __construct(){
+
+		$driver = config('db_driver');
 
 		// Include the driver and create a new object based on that driver.
 		$driver_path = CORE_LIB_PATH . 'drivers' . DS . ucfirst(strtolower($driver)) . '.php';
@@ -38,18 +39,19 @@ class Model {
 			$C->error('Unable to find class <strong>' . $driver . '</strong> in <strong>' . $driver_path . '</strong>', 500);
 		}
 		// Store the new object into $this->_driver to be used through out.
-		$this->_driver = new $driver;
+		$this->_driver = load_class($driver);
 	}
 
 	/**
-	 * Model::__destruct()
-	 * Close any open connections
+	 * Model::__get()
+	 * This is here simply to allow models to be able to use controller methods/variables as well.
 	 * 
-	 * @return void
+	 * @param mixed $key
+	 * @return
 	 */
-	public function __destruct(){
-		// Close any open connections
-		$this->_driver->__destruct();
+	function __get($key){
+		$C = get_instance();
+		return $C->$key;
 	}
 
 	/**

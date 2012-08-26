@@ -20,8 +20,8 @@ class Controller {
 	/** Config lines placeholder **/
 	public $_config = array();
 
-	/** Holds boolean on whether or not database file exists **/
-	private $_database_file_exists = false;
+	/** Keys are file names and value is boolean true/false if it exists **/
+	private $loaded_files = array();
 
 	/** Database lines placeholder - Holds info from /app/config/database.php **/
 	public $_database = array();
@@ -33,11 +33,12 @@ class Controller {
 	 * @return void
 	 */
 	public function __construct(){
-		Log_Message('Loaded', 'Controller loaded');
+		// Call this log message here as this is the only class not loaded using the "load_class" function
+		Log_Message('Classes loaded', __CLASS__);
 		self::$instance =& $this;
 
 		// Load the load class
-		$this->load = new Load();
+		$this->load = load_class('Load', 'lib');
 
 		// load the default config file, if there is one.
 		$this->loadConfig();
@@ -57,6 +58,34 @@ class Controller {
 		return self::$instance;
 	}
 
+	/**
+	 * Controller::setLoaded()
+	 * Method to keep track of what files are found and which are not.
+	 * 
+	 * @param string $file
+	 * @param bool $bool
+	 * @return void
+	 */
+	public function setLoaded($file = '', $bool = true){
+		$this->loaded_files[$file] = $bool;
+	}
+
+	/**
+	 * Controller::isLoaded()
+	 * Returns true or false depnding on if a file has been recorded as loaded
+	 * 
+	 * @param string $file
+	 * @return
+	 */
+	public function isLoaded($file = ''){
+		if( !empty($this->loaded_files[$file]) ){
+			if( $this->loaded_files[$file] ){
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * Controller::loadConfig()
@@ -67,15 +96,21 @@ class Controller {
 	 * @return mixed
 	 */
 	public function loadConfig($file = 'config'){
+		// Default this to false until it is found
+		$this->setLoaded('app_config', false);
+		$this->setLoaded('core_config', false);
+
 		// Path to the config file to load
 		if( file_exists(APP_PATH . 'config' . DS . $file . '.php') ){
 			$path = APP_PATH . 'config' . DS . $file . '.php';
+			$this->setLoaded('app_config', true);
 		}
 		elseif( file_exists(CORE_PATH . 'default' . DS . $file . '.php')){
+			$this->setLoaded('core_config', true);
 			$path = CORE_PATH . 'default' . DS . $file . '.php';
 		}
 
-		// No path to no file? Fail out.
+		// Framework can't work without a config file. If even the core config can't be called, fail.
 		if( empty($path) ){
 			$C = get_instance();
 			$C->error('Unable to find config file: ' . $file . '.php');
@@ -108,6 +143,9 @@ class Controller {
 	 * @return void
 	 */
 	private function loadThemeConfig(){
+		// Default the theme config to false until we verify that it's found
+		$this->setLoaded('theme_config', false);
+
 		// Get the active theme name
 		$theme = config('theme');
 		if( empty($theme) ) $theme = 'default';
@@ -118,6 +156,7 @@ class Controller {
 		// If the file exists, grab it's contents
 		if( file_exists($path) ){
 			require_once($path);
+			$this->setLoaded('theme_config', true);
 
 			if( !empty($config) ){
 				// Because we already have an existing $_config, we need to loop over this one
@@ -154,7 +193,9 @@ class Controller {
 	public function index(){
 
 		// If we're loading this, then we're displaying the default page. So do some checks!
-		$this->set('config_exists', file_exists(APP_CONFIG_PATH . 'config.php'));
+		$this->set('app_config', isLoaded('app_config'));
+		$this->set('theme_config', isLoaded('theme_config'));
+		$this->set('core_config', isLoaded('core_config'));
 
 		## DATABASE ##
 		// Set whether or not the user had set up any information in the database file
@@ -164,7 +205,7 @@ class Controller {
 
 		// Include the model file. This is not always required, but on the default display page, we need to test the connection
 		require_once(CORE_LIB_PATH . 'Model.php');
-		$model = new Model();
+		$model = load_class('Model');
 
 		// Test for a valid connection
 		$db_user = config('db_user');
@@ -176,7 +217,7 @@ class Controller {
 		## END DATABASE CHECK ##
 
 		// Display page
-		$this->set('output', '<strong>Congratulations! And welcome to ThemeWork!</strong>');
+		$this->set('output', 'Hello World!');
 		$this->set('pageTitle', config('site_name') . ' | ' . config('tag_line'));
 
 		// Force theme as this is the main theme for ThemeWork
@@ -184,6 +225,79 @@ class Controller {
 
 		// Render page
 		$this->view('index');
+	}
+
+	/**
+	 * Controller::doAutoInjection()
+	 * Handle the JS and CSS auto injection as set (or not) in the user's config
+	 * 
+	 * @param string $method
+	 * @return array
+	 */
+	public function doAutoInjection($method = 'JS'){
+		// Ensure it's capatlized, even if the developer forgets
+		$method = strtoupper($method);
+
+		// Configuration options
+		// Because all options are stored in the repo in lower case, strtolower them all
+		$auto_inject_js = config('auto_inject_js');
+		$auto_inject_css = config('auto_inject_css');
+		$auto_inject_package = config('auto_inject_package');
+
+		// All auto injections are empty. Stop here.
+		if( empty($auto_inject_css) && empty($auto_inject_js) && empty($auto_inject_package) ){
+			return false;
+		}
+
+		// Have to do some work, so load the repos
+		include(CORE_LIB_PATH . 'repo' . DS . 'injection.php');
+
+		// Place holder
+		$loaded = array();
+
+		// Perform magic below - Starting with packages (to ensure that if they want other stuff, it isn't already used)
+
+		// First, check for packages
+		if( !empty($auto_inject_package) ){
+			// The packages should never be an array but if ever it is...
+			if( is_array($auto_inject_package) ){
+				foreach( $auto_inject_package as $package ){
+					// All package names must be in lower case
+					$package = strtolower($package);
+
+					// Ensure that there actually is a package by that name
+					if( !empty($inject['Package'][$package]) ){
+						// Loop over the $method (JS/CSS) files in the package and add them to loaded
+						foreach( $inject['Package'][$package][$method] as $file ){
+							// No loading the same file twice
+							if( !in_array($inject[$method][$file], $loaded) ){
+								$loaded[] = $inject[$method][$file];
+							}
+						}
+					}
+				}
+			}
+			else {
+				// All package names must be in lowercase
+				$auto_inject_package = strtolower($auto_inject_package);
+
+				if( !empty($inject['Package'][$auto_inject_package]) ){
+					// Loop over the $method (JS/CSS) files in the package and add them to loaded
+					foreach( $inject['Package'][$auto_inject_package][$method] as $file ){
+						// No loading the same file twice
+						if( !in_array($inject[$method][$file], $loaded) ){
+							$loaded[] = $inject[$method][$file];
+						}
+					}
+				}
+			}
+		}
+
+		if( !empty($loaded) ){
+			Log_Message('Auto Injected ' . $method . ' files', $loaded);
+		}
+
+		return $loaded;
 	}
 
 	/**
@@ -293,7 +407,7 @@ class Controller {
 			}
 			echo '
 			<div id="ThemeWord_debug" class="container" style="margin: 20px auto 50px auto;"></div>
-			<script src=\'' . config('base_url') . 'core/default/js/prettyPrint.js\'></script>
+			<script src=\'' . site_url() . 'core/default/js/prettyPrint.js\'></script>
 			<script>
 			var randomObject = ' . $json . ';
     		var ppTable = prettyPrint(randomObject, {maxDepth: 10}), debug = document.getElementById(\'ThemeWord_debug\');

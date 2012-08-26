@@ -1,3 +1,1 @@
-.2 Added error checking in routing. Fail on no controller file. Fail on no class within controller file.
-
-.1 New Framework begins!
+.1 New Framework is born called ThemeWork!

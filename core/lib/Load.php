@@ -29,8 +29,25 @@ class Load {
 	}
 
 
+	/**
+	 * Load::model()
+	 * Loads a user's model into play. Also auto loads the Model for which it *should* extend
+	 * 
+	 * @param string $file
+	 * @param string $object_name
+	 * @return void
+	 */
 	public function model($file = '', $object_name = ''){
+		// Get controller
 		$C =& get_instance();
+
+		// First get the core model class
+		load_class('Model', 'lib');
+
+		// Secondly, load the DB class as well to serve as an interface between the controller, the model and the driver
+		$C->db = load_class('Db', 'lib');
+
+		// Depending on if they wish for the object to have a different name, set and get
 		if( !empty($object_name) ){
 			$C->$object_name = $this->_load('model', $file);
 		}
@@ -71,16 +88,6 @@ class Load {
 			$C->error('Unable to find ' . $type . '/' . $file . '.php');
 		}
 
-		// Include the file
-		require_once($path);
-
-		if( class_exists($file) ){
-			$instance = new $file();
-			return $instance;
-		}
-		else {
-			pr('class does not exist');
-			exit;
-		}
+		return load_class($file, $type);
 	}
 }
