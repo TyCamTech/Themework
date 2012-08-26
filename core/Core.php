@@ -78,9 +78,7 @@ class Core {
 		// If no path to file, it was not found. Error out.
 		if( empty($path_to_file) ){
 			// Default it back to the core controller to show the error.
-			$c = 'Controller';
-			$c = load_class($c);
-			$c->error('Unable to locate controller file: /controller/' . $controller . '.php');
+			show_error('Unable to locate controller file: /controller/' . $controller . '.php');
 		}
 
 		// Since file was found, include it
@@ -89,9 +87,7 @@ class Core {
 		// File was found but no class exists, error out
 		if( !class_exists($controller) ){
 			// Default it back to the core controller to show the error.
-			$c = 'Controller';
-			$c = load_class($c);
-			$c->error('Unable to load class: ' . $controller);
+			show_error('Unable to load class: ' . $controller);
 		}
 
 		// Create the controller object so that we can use it's views for errors

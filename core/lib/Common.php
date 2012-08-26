@@ -236,6 +236,15 @@ if( !function_exists('load_class') ){
 	}
 }
 
+if( !function_exists('show_error') ){
+	function show_error($x = '', $status = 404){
+		$error = load_class('Error', 'lib');
+
+		$error->show($x, $status);
+		exit;
+	}
+}
+
 if( !function_exists('site_url') ){
 	/**
 	 * site_url()

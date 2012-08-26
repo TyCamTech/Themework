@@ -125,7 +125,7 @@ class Controller {
 				$this->_config[$key] = $item;
 			}
 		}
-		else {
+		elseif (!empty($config)) {
 			$this->_config[] = $config;
 		}
 
@@ -179,8 +179,8 @@ class Controller {
 	 * @return void
 	 */
 	public function error($msg = '', $status = 404){
-		$this->load->library('error');
-		$this->error->show($msg, $status);
+		$this->load->library('error', 'errorobject');
+		$this->errorobject->show($msg, $status);
 		exit;
 	}
 
@@ -204,12 +204,12 @@ class Controller {
 		$this->set('database_set', $db_set);
 
 		// Include the model file. This is not always required, but on the default display page, we need to test the connection
-		require_once(CORE_LIB_PATH . 'Model.php');
-		$model = load_class('Model');
+		$model = load_class('Model', 'lib');
 
 		// Test for a valid connection
 		$db_user = config('db_user');
 		if( !empty($db_user) ){
+			// Normally this is handled as queries are run but in this case, we just need to know if it can or can not connect
 			$db_conn = $model->connect();
 			$db_connect = ( $db_conn === false ) ? false : true;
 			$this->set('database_connection', $db_connect);
