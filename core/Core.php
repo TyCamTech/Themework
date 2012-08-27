@@ -6,6 +6,7 @@ define('VERSION', 0.1);
 // More paths, based off the paths set in index.php
 define('APP_CONFIG_PATH', APP_PATH . 'config' . DS);
 define('APP_LIBRARY_PATH', APP_PATH . 'library' . DS);
+define('APP_CORE_PATH', APP_PATH . 'core' . DS);
 define('APP_CONTROLLER_PATH', APP_PATH . 'controller' . DS);
 define('APP_MODEL_PATH', APP_PATH . 'model' . DS);
 define('APP_THEME_PATH', APP_PATH . 'theme' . DS);
@@ -15,20 +16,27 @@ define('CORE_LIB_PATH', CORE_PATH . 'lib' . DS);
 // This must be included at the top to start the ball rolling on everything else.
 require_once( CORE_PATH . 'lib' . DS . 'Common.php');
 
-// Files to load - First for client's APP
-require_once(APP_PATH . 'config/constants.php');
-
 // Files to load - part of core
 require_once(CORE_LIB_PATH . 'Load.php');
 require_once(CORE_LIB_PATH . 'Controller.php');
 
-if( file_exists(APP_PATH . 'core' . DS . 'my_controller.php') ){
-	require_once(APP_PATH . 'core' . DS . 'my_controller.php');
-}
-
 // Controller instance
 function &get_instance(){
 	return Controller::getInstance();
+}
+
+function &ThemeWork_config(){
+	return Config::getInstance();
+}
+
+// get the settings, either in /app/config.php or in /core/default/config.php
+$config = load_class('Config', 'lib');
+$config->loadConfig('config');
+
+if( config('class_prefix') != false ){
+	if( file_exists(APP_CORE_PATH . config('class_prefix') . '_controller.php') ){
+		require_once(APP_CORE_PATH . config('class_prefix') . '_controller.php');
+	}
 }
 
 /**
@@ -91,7 +99,13 @@ class Core {
 		}
 
 		// Create the controller object so that we can use it's views for errors
-		$dispatch = load_class($controller);
+		if( $controller == 'Controller' ){
+			// Call using the traditional method to avoid having it log to debugging twice
+			$dispatch = new Controller();
+		}
+		else {
+			$dispatch = load_class($controller);
+		}
 
 		// Ensure that the method exists and then try to load it
 		if( method_exists($controller, $method) ){
@@ -99,7 +113,7 @@ class Core {
 			call_user_func(array($dispatch, $method), $url);
 		}
 		else {
-			$dispatch->error('Unable to find method <strong>' . ucfirst($controller) . '::' . $method . '</strong>', 404);
+			show_error('Unable to find method <strong>' . ucfirst($controller) . '::' . $method . '</strong>', 404);
 		}
 	}
 }

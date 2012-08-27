@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Set your active theme here.
  * This MUST match the folder name found in /app/theme/
@@ -12,11 +11,6 @@ $config['theme'] = 'default';
  **/
 $config['base_url'] = 'http://localhost/ThemeWork/';
 
-/**
- * Turn debugging output on and off.
- * In the future, this will be done by setting development/production modes
- **/
-$config['debug'] = true;
 
 /**
  * Database Information
@@ -27,9 +21,33 @@ $config['db_user'] = '';
 $config['db_pass'] = '';
 $config['db_database'] = '';
 
-# Name and Tagline - kind of like Wordpress
+
+/**
+ * Name and Tagline - kind of like Wordpress
+ **/
 $config['site_name'] = 'ThemeWork';
 $config['tag_line'] = 'A lightweight, highly theme / skinable MVC php framework';
+
+
+/**
+ * Class Prefixes
+ * In this framework, you can use your own core controller or core model
+ * classes in the /app/core/ folder.
+ * You just need to specify the prefix in which to use to distinguish your files from the core ThemeWork files.
+ * For example:
+ * $config['class_prefix'] = 'My';
+ * means that ThemeWork will look for /app/core/My_controller.php file and class.
+ * 
+ * If you do use this method, be sure that your My_controller class extends Controller
+ **/
+$config['class_prefix'] = 'My';
+
+/**
+ * Turn debugging output on and off.
+ * In the future, this will be done by setting development/production modes
+ **/
+$config['debug'] = true;
+
 
 /** Auto Inject JS/CSS Frameworks
  * 

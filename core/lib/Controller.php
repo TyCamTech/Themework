@@ -40,9 +40,6 @@ class Controller {
 		// Load the load class
 		$this->load = load_class('Load', 'lib');
 
-		// load the default config file, if there is one.
-		$this->loadConfig();
-
 		// Check for theme dependent config file
 		// Because this is called after the primary config, this one can override variables set in the first one.
 		$this->loadThemeConfig();
@@ -88,53 +85,6 @@ class Controller {
 	}
 
 	/**
-	 * Controller::loadConfig()
-	 * Loads a config file. Defaults to config.php but can load any config file.
-	 * Dumps $config[] array items into $this->config[$key] = $item;
-	 * 
-	 * @param string $file
-	 * @return mixed
-	 */
-	public function loadConfig($file = 'config'){
-		// Default this to false until it is found
-		$this->setLoaded('app_config', false);
-		$this->setLoaded('core_config', false);
-
-		// Path to the config file to load
-		if( file_exists(APP_PATH . 'config' . DS . $file . '.php') ){
-			$path = APP_PATH . 'config' . DS . $file . '.php';
-			$this->setLoaded('app_config', true);
-		}
-		elseif( file_exists(CORE_PATH . 'default' . DS . $file . '.php')){
-			$this->setLoaded('core_config', true);
-			$path = CORE_PATH . 'default' . DS . $file . '.php';
-		}
-
-		// Framework can't work without a config file. If even the core config can't be called, fail.
-		if( empty($path) ){
-			$C = get_instance();
-			$C->error('Unable to find config file: ' . $file . '.php');
-		}
-
-		// Require once to ensure we don't grab it a second time
-		require_once($path);
-
-		// Dump values into $this->_config
-		if( !empty($config) && is_array($config) ){
-			foreach( $config as $key => $item ){
-				$this->_config[$key] = $item;
-			}
-		}
-		elseif (!empty($config)) {
-			$this->_config[] = $config;
-		}
-
-		Log_Message('Config Loaded', $this->_config);
-
-		return true;
-	}
-
-	/**
 	 * Controller::loadThemeConfig()
 	 * Checks for a config file in the active theme folder.
 	 * If found, it adds it's values to the $_config variable.
@@ -171,20 +121,6 @@ class Controller {
 	}
 
 	/**
-	 * Controller::error()
-	 * Display's an error message via the Error.php library
-	 * 
-	 * @param string $msg
-	 * @param integer $status
-	 * @return void
-	 */
-	public function error($msg = '', $status = 404){
-		$this->load->library('error', 'errorobject');
-		$this->errorobject->show($msg, $status);
-		exit;
-	}
-
-	/**
 	 * Controller::index()
 	 * Default first view ever if there's nothing in 'app' folder
 	 * 
@@ -193,9 +129,8 @@ class Controller {
 	public function index(){
 
 		// If we're loading this, then we're displaying the default page. So do some checks!
-		$this->set('app_config', isLoaded('app_config'));
-		$this->set('theme_config', isLoaded('theme_config'));
-		$this->set('core_config', isLoaded('core_config'));
+		$this->set('app_config',( file_exists(APP_CONFIG_PATH . 'config.php') ) ? true : false );
+		$this->set('theme_config', ( file_exists(APP_THEME_PATH . config('theme') . DS . 'config.php') ) ? true : false );
 
 		## DATABASE ##
 		// Set whether or not the user had set up any information in the database file
@@ -354,11 +289,13 @@ class Controller {
 		if( is_dir(APP_PATH . 'theme' . DS . $this->_theme) ){
 			$path = APP_PATH . 'theme' . DS . $this->_theme;
 		}
+		elseif( is_dir(CORE_PATH . $this->_theme)) {
+			$path = CORE_PATH . $this->_theme;
+		}
 
 		// No path? That means the file was not found.
 		if( empty($path) ){
-			$this->error('Theme "' . $this->_theme . '" is not available');
-			return;
+			show_error('Theme "' . $this->_theme . '" is not available', 500);
 		}
 
 		// Full path to view file, including theme folder and theme name
@@ -372,7 +309,7 @@ class Controller {
 
 		// Still can't find the file?
 		if( empty($view) ){
-			$this->error('File "' . $this->_theme . DS . $page . '.php" does not exist', 404);
+			show_error('File "' . $this->_theme . DS . $page . '.php" does not exist', 404);
 		}
 		else {
 			// The user wants the info returned

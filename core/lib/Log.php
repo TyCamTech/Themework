@@ -34,13 +34,26 @@ class Log {
 		return self::$instance;
 	}
 
+	/**
+	 * Log::add()
+	 * Adds elements to the debugging report
+	 * 
+	 * @param string $key
+	 * @param string $value
+	 * @return void
+	 */
 	public static function add($key = '', $value = ''){
 		// For backwards compatibility pre PHP 5.3
 		if( !defined('JSON_FORCE_OBJECT') && is_array($value) ){ $value = (object)$value; }
 
 		// Add to result array
 		if( !empty(self::$result[$key]) ){
-			self::$result[$key] .= ', ' . $value;
+			if( is_array(self::$result[$key]) ){
+				self::$result[$key][] = $value;
+			}
+			else {
+				self::$result[$key] .= ', ' . $value;
+			}
 		}
 		else {
 			self::$result[$key] = $value;

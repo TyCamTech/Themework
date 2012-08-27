@@ -9,6 +9,15 @@ if( !function_exists('config') ){
 	 * @return mixed
 	 */
 	function config($line = '', $file = ''){
+		$config =& ThemeWork_config();
+
+		if( !empty($file) ){
+			$config->loadConfig($file);
+		}
+
+		return $config->item($line);
+
+		/*
 		$C =& get_instance();
 
 		if( !empty($file) ){
@@ -22,6 +31,7 @@ if( !function_exists('config') ){
 		else {
 			return false;
 		}
+		*/
 	}
 }
 
