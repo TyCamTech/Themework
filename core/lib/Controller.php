@@ -9,16 +9,13 @@
  */
 class Controller {
 
-	/** The theme - Default is 'default' **/
-	var $_theme = 'default';
-
 	private static $instance;
+
+	/** The theme - Default is 'default' **/
+	public $_theme = 'default';
 
 	/** $this->set(name, value) puts information into $this->_variables for use in the views **/
 	private $_variables = array();
-
-	/** Config lines placeholder **/
-	public $_config = array();
 
 	/** Keys are file names and value is boolean true/false if it exists **/
 	private $loaded_files = array();
@@ -39,10 +36,6 @@ class Controller {
 
 		// Load the load class
 		$this->load = load_class('Load', 'lib');
-
-		// Check for theme dependent config file
-		// Because this is called after the primary config, this one can override variables set in the first one.
-		$this->loadThemeConfig();
 	}
 
 	/**
@@ -53,71 +46,6 @@ class Controller {
 	 */
 	public static function &getInstance(){
 		return self::$instance;
-	}
-
-	/**
-	 * Controller::setLoaded()
-	 * Method to keep track of what files are found and which are not.
-	 * 
-	 * @param string $file
-	 * @param bool $bool
-	 * @return void
-	 */
-	public function setLoaded($file = '', $bool = true){
-		$this->loaded_files[$file] = $bool;
-	}
-
-	/**
-	 * Controller::isLoaded()
-	 * Returns true or false depnding on if a file has been recorded as loaded
-	 * 
-	 * @param string $file
-	 * @return
-	 */
-	public function isLoaded($file = ''){
-		if( !empty($this->loaded_files[$file]) ){
-			if( $this->loaded_files[$file] ){
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Controller::loadThemeConfig()
-	 * Checks for a config file in the active theme folder.
-	 * If found, it adds it's values to the $_config variable.
-	 * Can override existing config values found in /app/config/config.php
-	 * 
-	 * @return void
-	 */
-	private function loadThemeConfig(){
-		// Default the theme config to false until we verify that it's found
-		$this->setLoaded('theme_config', false);
-
-		// Get the active theme name
-		$theme = config('theme');
-		if( empty($theme) ) $theme = 'default';
-
-		// Build path to file
-		$path = APP_THEME_PATH . $theme . DS . 'config.php';
-
-		// If the file exists, grab it's contents
-		if( file_exists($path) ){
-			require_once($path);
-			$this->setLoaded('theme_config', true);
-
-			if( !empty($config) ){
-				// Because we already have an existing $_config, we need to loop over this one
-				// To ensure that it's not reseting it and only overriding it.
-				foreach( $config as $key => $value ){
-					$this->_config[$key] = $value;
-				}
-
-				Log_Message('Theme Config Loaded', $config);
-			}
-		}
 	}
 
 	/**

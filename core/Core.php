@@ -20,18 +20,32 @@ require_once( CORE_PATH . 'lib' . DS . 'Common.php');
 require_once(CORE_LIB_PATH . 'Load.php');
 require_once(CORE_LIB_PATH . 'Controller.php');
 
-// Controller instance
+
+/**
+ * get_instance()
+ * Returns an instance of the core Controller class
+ * 
+ * @return
+ */
 function &get_instance(){
 	return Controller::getInstance();
 }
 
+/**
+ * ThemeWork_config()
+ * Returns an instance of the core Config class
+ * 
+ * @return
+ */
 function &ThemeWork_config(){
 	return Config::getInstance();
 }
 
 // get the settings, either in /app/config.php or in /core/default/config.php
 $config = load_class('Config', 'lib');
-$config->loadConfig('config');
+// Initialize the config info. This will load core/config, app/config and then theme/config, overloading as it goes
+// as necessary, giving the theme config top priority.
+$config->init();
 
 if( config('class_prefix') != false ){
 	if( file_exists(APP_CORE_PATH . config('class_prefix') . '_controller.php') ){
@@ -86,7 +100,7 @@ class Core {
 		// If no path to file, it was not found. Error out.
 		if( empty($path_to_file) ){
 			// Default it back to the core controller to show the error.
-			show_error('Unable to locate controller file: /controller/' . $controller . '.php');
+			show_error('Unable to locate controller file: <strong>/controller/' . $controller . '.php</strong>');
 		}
 
 		// Since file was found, include it
@@ -95,7 +109,7 @@ class Core {
 		// File was found but no class exists, error out
 		if( !class_exists($controller) ){
 			// Default it back to the core controller to show the error.
-			show_error('Unable to load class: ' . $controller);
+			show_error('Unable to load class: <strong>' . $controller . '</strong>');
 		}
 
 		// Create the controller object so that we can use it's views for errors

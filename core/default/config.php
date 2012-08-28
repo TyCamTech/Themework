@@ -15,12 +15,17 @@ $config['base_url'] = 'http://localhost/ThemeWork/';
 /**
  * Database Information
  **/
-$config['db_driver'] = 'MySQL';
-$config['db_host'] = 'localhost';
-$config['db_user'] = '';
-$config['db_pass'] = '';
-$config['db_database'] = '';
+$config['db']['default']['db_driver'] = 'MySQL';
+$config['db']['default']['db_host'] = 'localhost';
+$config['db']['default']['db_user'] = '';
+$config['db']['default']['db_pass'] = '';
+$config['db']['default']['db_database'] = '';
 
+$config['db']['wordpress']['db_driver'] = 'MySQL';
+$config['db']['wordpress']['db_host'] = 'localhost';
+$config['db']['wordpress']['db_user'] = 'wp';
+$config['db']['wordpress']['db_pass'] = 'wp';
+$config['db']['wordpress']['db_database'] = 'wp';
 
 /**
  * Name and Tagline - kind of like Wordpress

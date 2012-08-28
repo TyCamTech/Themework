@@ -174,36 +174,6 @@ if( !function_exists('css') ){
 	}
 }
 
-if( !function_exists('load_file') ){
-	/**
-	 * load_file()
-	 * Checks for a file's existance and then loads it.
-	 * $core is false by default. Set true to load from code folder
-	 * Leave '.php' off as this function appends it for you
-	 * 
-	 * @param string $file
-	 * @param bool $core
-	 * @return mixed
-	 */
-	function load_file($file = '', $core = false){
-		if( $core ){
-			$path = CORE_PATH . $file . '.php';
-		}
-		else {
-			$path = APP_PATH . $file . '.php';
-		}
-
-		// File does not exist. Die now.
-		if( !file_exists($path) ){
-			return false;
-		}
-
-		// Include the file!
-		require_once($path);
-		Log_Message('Files', $path);
-	}
-}
-
 if( !function_exists('load_class') ){
 	/**
 	 * load_class()
@@ -247,6 +217,14 @@ if( !function_exists('load_class') ){
 }
 
 if( !function_exists('show_error') ){
+	/**
+	 * show_error()
+	 * Displays the error page.
+	 * 
+	 * @param string $x
+	 * @param integer $status
+	 * @return void
+	 */
 	function show_error($x = '', $status = 404){
 		$error = load_class('Error', 'lib');
 
@@ -271,6 +249,7 @@ if( !function_exists('site_url') ){
 			$url .= '/';
 		}
 
+		// If the user included a path to append.. append it.
 		if( !empty($path) ){
 			return $url . $path;
 		}

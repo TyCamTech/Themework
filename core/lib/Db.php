@@ -54,8 +54,23 @@ class Db {
 		$this->_set[$name] = $value;
 	}
 
-	public function where($where = null){
-		
+
+	/**
+	 * Db::where()
+	 * 
+	 * @param mixed $where
+	 * @return void
+	 */
+	public function where($where = null, $value = ''){
+		// If $where is a string, then we are to compare it with value
+		if( is_string($where) ){
+			$this->_where = array($where => mysql_real_escape_string($value));
+		}
+		elseif( is_array($where)) {
+			foreach( $where as $key => $value ){
+				$this->_where[$key] = mysql_real_escape_string($value);
+			}
+		}
 	}
 
 	/**
@@ -70,7 +85,46 @@ class Db {
 			$this->_table = $table;
 		}
 
-		$query = 'SELECT ' . $this->_select . ' FROM ' . $this->_table;
+		// Default to * (all fields)
+		$select = '*';
+		if( !empty($this->_select) ){
+			//TODO:Need to add security measures, check for injection
+			$select = $this->_select;
+		}
+
+		// Build the limit string based on limit vars.
+		// Also, force offset and limit to (int) to ensure no chance of injection
+		$limit = null;
+		if( !empty($this->_limit) ){
+			$offset = ( empty($this->_offset) ) ? (int)$this->_offset : 0;
+			$limit = (int)$limit;
+			$limit = ' LIMIT ' . $offset . ', ' . $limit;
+		}
+
+		// Build the order by statment
+		$order = null;
+		if( !empty($this->_order) ){
+			$order = ' ORDER BY ' . $this->_order . ' ' . $this->_dir;
+		}
+
+		// Build the where statement. This will get quite involved.
+		$where = null;
+		if( !empty($this->_where) ){
+			foreach( $this->_where as $key => $value ){
+				if( !empty($where) ){
+					$where .= ' AND ';
+				}
+				if( is_numeric($value) ){
+					$where .= '`' . $key . '` = ' . $value;
+				}
+				elseif( is_string($value) ){
+					$where .= '`' . $key . '` = "' . $value . '"';
+				}
+			}
+		}
+
+		// Put the query together into a string for the driver
+		$query = 'SELECT ' . $select . ' FROM ' . $this->_table . $where . $order . $limit;
 		echo $query;
 	}
 

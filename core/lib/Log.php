@@ -48,7 +48,10 @@ class Log {
 
 		// Add to result array
 		if( !empty(self::$result[$key]) ){
-			if( is_array(self::$result[$key]) ){
+			if( (is_object(self::$result[$key]) && is_object($value)) || (is_array(self::$result[$key]) && is_array($value)) ){
+				self::$result[$key] = array_merge((array)self::$result[$key], (array)$value);
+			}
+			elseif( is_array(self::$result[$key]) && !is_array($value) ){
 				self::$result[$key][] = $value;
 			}
 			else {
