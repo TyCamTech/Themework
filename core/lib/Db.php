@@ -14,8 +14,21 @@ class Db {
 
 	private $_set = array();
 
+	/** Place holder for the driver to be used **/
+	private $_driver;
+
 	public function __construct($db_object = null){
-		
+	}
+
+	/**
+	 * Db::_setDriver()
+	 * This loads the driver into the Db interface so we can get and send out responses from the driver.
+	 * 
+	 * @param mixed $driver
+	 * @return void
+	 */
+	public function _setDriver($driver){
+		$this->_driver = $driver;
 	}
 
 	public function select($select = ''){

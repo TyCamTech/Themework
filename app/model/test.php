@@ -2,7 +2,7 @@
 class Test extends Model {
 
 	/** Tells ThemeWorks which database this particular model is to use **/
-	var $uses = 'wordpress';
+	var $uses = 'default';
 
 	public function __construct(){
 		parent::__construct();

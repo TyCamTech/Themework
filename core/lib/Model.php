@@ -55,7 +55,21 @@ class Model {
 			show_error('There is currently no driver for data type <strong>' . $config['driver'] . '</strong>', 500);
 		}
 
+		// Load the driver
+		$this->_driver = load_class($config['driver'], 'lib' . DS . 'drivers');
+
 		//TODO:Here is where drivers and "active records" and other classes will be introduced
+		if( $config['interface'] ){
+			// First, load the driver
+			$this->db = load_class('Db', 'lib');
+			$this->db->_setDriver($this->_driver);
+		}
+		else {
+			// No interface? That's fine. Load the driver directly into the db object
+			$this->db = $this->_driver;
+		}
+
+		
 	}
 
 	/**
