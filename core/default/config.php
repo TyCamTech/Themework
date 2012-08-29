@@ -15,17 +15,19 @@ $config['base_url'] = 'http://localhost/ThemeWork/';
 /**
  * Database Information
  **/
-$config['db']['default']['db_driver'] = 'MySQL';
-$config['db']['default']['db_host'] = 'localhost';
-$config['db']['default']['db_user'] = '';
-$config['db']['default']['db_pass'] = '';
-$config['db']['default']['db_database'] = '';
+$config['data']['default']['driver'] = 'MySQL';
+$config['data']['default']['interface'] = true;
+$config['data']['default']['host'] = 'localhost';
+$config['data']['default']['user'] = '';
+$config['data']['default']['pass'] = '';
+$config['data']['default']['database'] = '';
 
-$config['db']['wordpress']['db_driver'] = 'MySQL';
-$config['db']['wordpress']['db_host'] = 'localhost';
-$config['db']['wordpress']['db_user'] = 'wp';
-$config['db']['wordpress']['db_pass'] = 'wp';
-$config['db']['wordpress']['db_database'] = 'wp';
+$config['data']['wordpress']['driver'] = 'MySQL';
+$config['data']['wordpress']['interface'] = false;
+$config['data']['wordpress']['host'] = 'localhost';
+$config['data']['wordpress']['user'] = 'wp';
+$config['data']['wordpress']['pass'] = 'wp';
+$config['data']['wordpress']['database'] = 'wp';
 
 /**
  * Name and Tagline - kind of like Wordpress

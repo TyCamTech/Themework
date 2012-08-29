@@ -63,8 +63,8 @@ class Load {
 			show_error('Resource name "' . $object_name . '" is already being used somewhere in your code.', 500);
 		}
 
-		// Include the core class
-		$model = load_class('Model', 'lib');
+		// Include the core model class
+		require_once(CORE_LIB_PATH . 'Model.php');
 
 		// Create a new object within the controller object to hold the new model, using the desired name
 		$C->$object_name = $this->_load('model', $file);
@@ -75,59 +75,7 @@ class Load {
 		// Which database information to use for database connection?
 		$db_name = ( !empty($C->$object_name->uses) ) ? $C->$object_name->uses : 'default';
 
-		// Connect to database
-		$this->database($db_name);
-	}
-
-	/**
-	 * Load::database()
-	 * Loads a database into use for our framework
-	 * 
-	 * @param mixed $params
-	 * @param bool $return
-	 * @return void
-	 */
-	public function database($params = null, $return = false){
-		$C =& get_instance();
-
-		// If the params are empty, then set to default. Default will be our default db settings from the config.
-		$params = ( !empty($params) ) ? $params : 'default';
-
-		// If the user passed an array with the database info, that's fine. Use it.
-		// Need to so some checking here though, to make sure all the data is there
-		if( is_array($params) ){
-			$params = $params;
-		}
-		else {
-			// Pull the db config information from the config file
-			$dbConfig = config('db');
-			// If there are no db configs by the name (usually 'default')
-			// Then check to see if they just left out the name and put in just the params
-			if( empty($dbConfig[$params]) ){
-				// If the host, user and pass are not blank (using no param name)
-				// Then set it, because it has everything we need already
-				if( !empty($dbConfig['db_host']) && !empty($dbConfig['db_user']) && !empty($dbConfig['db_pass']) ){
-					$params = $dbConfig;
-				}
-			}
-			else {
-				// We have our params from the config!
-				$params = $dbConfig[$params];
-			}
-		}
-
-		// Make sure we can initialize the DB active record stuff.
-		$this->db = null;
-
-		// Secondly, load the DB class as well to serve as an interface between the controller, the model and the driver
-		$C->db = load_class('Db', 'lib');
-
-		#$C->db->init($params);
-	}
-
-
-	public function config($file){
-		
+		$C->$object_name->_init();
 	}
 
 

@@ -25,6 +25,40 @@ class Model {
 	}
 
 	/**
+	 * Model::_init()
+	 * Initialize the data source using the config intormation provided
+	 * This method will load the necessary drivers and "interfaces" that may be required,
+	 * providing all information is entered correctly.
+	 * 
+	 * @return void
+	 */
+	public function _init(){
+		// What does this model use? if not defined, set to default
+		$uses = ( !empty($this->uses) ) ? $this->uses : 'default';
+
+		// Retrieve the data config options.
+		$config = config('data');
+
+		// If there are no configuration settings for that data type
+		if( empty($config[$uses]) ){
+			show_error('Unable to find configuration information for data source <strong>' . $uses . '</strong>', 500);
+		}
+
+		// Shorten this down so we just have the config info we really want
+		$config = $config[$uses];
+
+		if( empty($config['driver']) ){
+			show_error('Driver for data source <strong>' . $uses . '</strong> is empty. This information is required.', 500);
+		}
+
+		if( !file_exists(CORE_LIB_PATH . 'drivers' . DS . ucfirst(strtolower($config['driver'])) . '.php') ){
+			show_error('There is currently no driver for data type <strong>' . $config['driver'] . '</strong>', 500);
+		}
+
+		//TODO:Here is where drivers and "active records" and other classes will be introduced
+	}
+
+	/**
 	 * Model::__get()
 	 * This is here simply to allow models to be able to use controller methods/variables as well.
 	 * 
