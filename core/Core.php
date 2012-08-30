@@ -9,9 +9,11 @@ define('APP_LIBRARY_PATH', APP_PATH . 'library' . DS);
 define('APP_CORE_PATH', APP_PATH . 'core' . DS);
 define('APP_CONTROLLER_PATH', APP_PATH . 'controller' . DS);
 define('APP_MODEL_PATH', APP_PATH . 'model' . DS);
+define('APP_DRIVERS_PATH', APP_MODEL_PATH . 'drivers' . DS);
 define('APP_THEME_PATH', APP_PATH . 'theme' . DS);
 define('CORE_DEFAULT_PATH', CORE_PATH . 'default' . DS);
 define('CORE_LIB_PATH', CORE_PATH . 'lib' . DS);
+define('CORE_DRIVERS_PATH', CORE_LIB_PATH . 'drivers' . DS);
 
 // This must be included at the top to start the ball rolling on everything else.
 require_once( CORE_PATH . 'lib' . DS . 'Common.php');
