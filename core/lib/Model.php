@@ -15,6 +15,12 @@ class Model {
 	private $_driver;
 
 	/**
+	 * These are the paths where drivers can be loaded from.
+	 * One in the core and one where the developers can use their own.
+	 **/
+	private $_driver_paths = array(CORE_DRIVERS_PATH, APP_DRIVERS_PATH);
+
+	/**
 	 * Model::__construct()
 	 * 
 	 * @param string $driver
@@ -47,29 +53,42 @@ class Model {
 		// Shorten this down so we just have the config info we really want
 		$config = $config[$uses];
 
+		// Each datasource requires a driver
 		if( empty($config['driver']) ){
 			show_error('Driver for data source <strong>' . $uses . '</strong> is empty. This information is required.', 500);
 		}
 
-		if( !file_exists(CORE_LIB_PATH . 'drivers' . DS . ucfirst(strtolower($config['driver'])) . '.php') ){
+		// Format it to the way the file names are formatted
+		$config['driver'] = ucfirst(strtolower($config['driver']));
+
+		// If there is no driver file
+		$path_to_driver = false;
+		foreach( $this->_driver_paths as $path ){
+			if( file_exists($path . $config['driver'] . '.php') ){
+				$path_to_driver = $path;
+				break;
+			}
+		}
+		if( !$path ){
 			show_error('There is currently no driver for data type <strong>' . $config['driver'] . '</strong>', 500);
 		}
 
 		// Load the driver
-		$this->_driver = load_class($config['driver'], 'lib' . DS . 'drivers');
+		$this->_driver = load_class($config['driver'], $path);
 
-		//TODO:Here is where drivers and "active records" and other classes will be introduced
-		if( $config['interface'] ){
+		// Interface can actually be set to true. In which case, it defaults to 'db' class
+		if( $config['interface'] === true ){ $config['interface'] == 'db'; }
+
+		// If the user is specifying an interface, load it as a class.
+		if( !empty($config['interface']) ){
 			// First, load the driver
-			$this->db = load_class('Db', 'lib');
+			$this->db = load_class(ucfirst(strtolower($config['interface'])), 'lib');
 			$this->db->_setDriver($this->_driver);
 		}
 		else {
 			// No interface? That's fine. Load the driver directly into the db object
 			$this->db = $this->_driver;
 		}
-
-		
 	}
 
 	/**

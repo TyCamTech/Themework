@@ -193,11 +193,23 @@ if( !function_exists('load_class') ){
 			return $_classes[$class];
 		}
 
-		// Check for files and load as necessary
+		// Using both the APP folders and the CORE folders
+		// Check for existance of files and if found, include
 		foreach( array(APP_PATH, CORE_PATH) as $path ){
-			if( file_exists($path . $directory . DS . $class . '.php') ){
-				require_once($path . $directory . DS . $class . '.php');
-				break;
+			// Since the $directory can be a full path
+			// Check the first 'x' characters against the root paths for a match
+			if( substr($directory, 0, strlen($path)) == $path ){
+				if( file_exists($directory . $class . '.php') ){
+					require_once($directory.$class.'.php');
+					break;
+				}
+			}
+			// Using a relative directory, check when appended to the root paths
+			else {
+				if( file_exists($path . $directory . DS . $class . '.php') ){
+					require_once($path . $directory . DS . $class . '.php');
+					break;
+				}
 			}
 		}
 
