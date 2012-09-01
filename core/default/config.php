@@ -16,18 +16,20 @@ $config['base_url'] = 'http://localhost/ThemeWork/';
  * Database Information
  **/
 $config['data']['default']['driver'] = 'MySQL';
-$config['data']['default']['interface'] = true;
+$config['data']['default']['interface'] = 'Driver';
 $config['data']['default']['host'] = 'localhost';
 $config['data']['default']['user'] = '';
 $config['data']['default']['pass'] = '';
 $config['data']['default']['database'] = '';
+$config['data']['default']['response_type'] = 'array';
 
 $config['data']['wordpress']['driver'] = 'MySQL';
-$config['data']['wordpress']['interface'] = false;
+$config['data']['wordpress']['interface'] = 'Driver';
 $config['data']['wordpress']['host'] = 'localhost';
 $config['data']['wordpress']['user'] = 'wp';
 $config['data']['wordpress']['pass'] = 'wp';
 $config['data']['wordpress']['database'] = 'wp';
+$config['data']['wordpress']['response_type'] = 'array';
 
 /**
  * Name and Tagline - kind of like Wordpress

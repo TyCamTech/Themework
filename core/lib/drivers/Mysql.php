@@ -9,29 +9,23 @@
  * @copyright 2012
  * @access public
  */
-class MySQL {
+class MySQL extends Driver {
 
 	/** Place holder db information **/
 	private $host, $user, $pass, $database;
 
+	/** The desired way to receive the data **/
+	protected $_response_type = 'array';
+
+	private $_conn;
+
+	private $db_charset = 'utf8';
+
 	/**
 	 * MySQL::__construct()
 	 * Create a new MySQL object
-	 * 
-	 * @param string $host
-	 * @param string $user
-	 * @param string $pass
-	 * @return void
 	 */
-	public function __construct($host = '', $user = '', $pass = '', $database = ''){
-		Log_Message('Driver Loaded', __CLASS__);
-		if( empty($host) ){
-			$this->host = config('db_host');
-			$this->user = config('db_user');
-			$this->pass = config('db_pass');
-			$this->database = config('db_database');
-		}
-	}
+	public function __construct(){}
 
 	/**
 	 * MySQL::connect()
@@ -42,18 +36,68 @@ class MySQL {
 	 * @param string $pass
 	 * @return
 	 */
-	public function connect(){
-		$conn = @mysql_connect($this->host, $this->user, $this->pass);
-		if( is_object($conn) ){
-			Log_Message('Database Connection Established', __CLASS__ . ': ' . $this->host);
-			return $conn;
+	public function connect($params = null){
+		$this->_conn = @mysql_connect($params['host'], $params['user'], $params['pass']);
+		if( !empty($this->_conn) ){
+			Log_Message('Database Connection Established', __CLASS__ . ': ' . $params['host']);
+
+			// Also establish a connection to the database as well
+			if( $this->select_db($params['database']) === false ){
+				show_error('Unable to connect to database: <strong>' . $params['database'] . '</strong>', 500);
+			}
+
+			$this->setResponseType($params['response_type']);
+
+			return $this->_conn;
 		}
 		Log_Message('<p class="alert-error"><i class="icon-fire"></i> &nbsp; Unable to connect to database</p>', __CLASS__ . ': ' . $this->host);
 		return false;
 	}
 
-	public function select_db(){
-		return @mysql_select_db($this->database);
+	/**
+	 * MySQL::select_db()
+	 * Creates a connection to the specific database
+	 * 
+	 * @param string $db
+	 * @return
+	 */
+	public function select_db($db = ''){
+		if( empty($db) ) return false;
+
+		return @mysql_select_db($db);
+	}
+
+	/**
+	 * MySQL::setResponseType()
+	 * Modify response type of all queries using this driver.
+	 * Options are xml, json, array and object
+	 * 
+	 * @param string $type
+	 * @return void
+	 */
+	public function setResponseType($type = 'array'){
+		$this->_response_type = $type;
+	}
+
+
+	/**
+	 * MySQL::query()
+	 * 
+	 * @param string $query
+	 * @return
+	 */
+	public function query($query = ''){
+		if( empty($query) ){ return false; }
+
+		$result = @mysql_query($query);
+		$error = @mysql_error();
+		if( !empty($error) ){
+			show_error($error);
+		}
+
+		$rows = @mysql_fetch_array($result, MYSQL_ASSOC);
+
+		return $rows;
 	}
 
 	/**

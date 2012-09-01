@@ -74,21 +74,12 @@ class Model {
 		}
 
 		// Load the driver
-		$this->_driver = load_class($config['driver'], $path);
+		require_once(CORE_LIB_PATH . 'Driver.php');
 
-		// Interface can actually be set to true. In which case, it defaults to 'db' class
-		if( $config['interface'] === true ){ $config['interface'] == 'db'; }
+		// Load the driver that is asked for
+		$this->db = load_class($config['driver'], $path);
 
-		// If the user is specifying an interface, load it as a class.
-		if( !empty($config['interface']) ){
-			// First, load the driver
-			$this->db = load_class(ucfirst(strtolower($config['interface'])), 'lib');
-			$this->db->_setDriver($this->_driver);
-		}
-		else {
-			// No interface? That's fine. Load the driver directly into the db object
-			$this->db = $this->_driver;
-		}
+		$this->db->connect($config);
 	}
 
 	/**

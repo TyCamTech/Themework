@@ -1,7 +1,7 @@
 <?php
 /**
- * Db
- * This class serves as an interface between the Model and the database driver that it calls.
+ * Driver
+ * This class serves as an interface between the Model and the driver that it calls.
  * This is to be a way of simplifying the building of queries
  * 
  * @package ThemeWork
@@ -9,7 +9,10 @@
  * @copyright 2012
  * @access public
  */
-class Db {
+class Driver {
+
+	protected $_config;
+
 	private $_select, $_table, $_limit, $_offset, $_order, $_dir, $_where;
 
 	private $_set = array();
@@ -17,7 +20,41 @@ class Db {
 	/** Place holder for the driver to be used **/
 	private $_driver;
 
-	public function __construct($db_object = null){
+	public function __construct(){
+	}
+
+	/**
+	 * Driver::escape()
+	 * General escape string type method.
+	 * Highly recommended that this is overridden for each driver using the datasource's preferred methods of escaping characters
+	 * 
+	 * @param string $str
+	 * @return string
+	 */
+	public function escape($str = ''){
+		if( empty($str) ) return '';
+
+		// If it's already a number, just return it. It can do no harm.
+		if( is_numeric($str) ){ return $str; }
+
+		if( is_array($str) ){
+			foreach( $str as $key => $val ){
+				$str[$key] = $this->escape($val);
+			}
+		}
+		elseif (is_string($str)){
+			$str = "'".addslashes($str)."'";
+		}
+		elseif (is_bool($str))
+		{
+			$str = ($str === FALSE) ? 0 : 1;
+		}
+		elseif (is_null($str))
+		{
+			$str = 'NULL';
+		}
+
+		return $str;
 	}
 
 	/**
@@ -46,7 +83,7 @@ class Db {
 	}
 
 	public function table($table = ''){
-		$this->_table = $table;
+		$this->_table = "`" . $table . "`";
 	}
 
 	/**
@@ -92,10 +129,15 @@ class Db {
 	 * 
 	 * @return void
 	 */
-	public function get($table = ''){
+	public function get($table = '', $response_type = null){
+
+		if( !empty($response_type) ){
+			$this->setResponseType($response_type);
+		}
+
 		// Table could already be set but, either way, set it now in case they changed their mind.
 		if( !empty($table) ){
-			$this->_table = $table;
+			$this->table($table);
 		}
 
 		// Default to * (all fields)
@@ -138,7 +180,9 @@ class Db {
 
 		// Put the query together into a string for the driver
 		$query = 'SELECT ' . $select . ' FROM ' . $this->_table . $where . $order . $limit;
-		echo $query;
+		$result = $this->query($query);
+
+		return $this->convertToType($result, $this->_response_type);
 	}
 
 	public function insert(){
@@ -151,5 +195,28 @@ class Db {
 
 	public function delete(){
 		
+	}
+
+
+	public function convertToType($result = null, $type = 'array'){
+		$type = strtolower($type);
+
+		// If the result is an array and it's an array thatt's asked for, just return it.
+		if( is_array($result) && $type == 'array' ){ return $result; }
+		$out = null;
+
+		// Return XMl - There HAS GOT TO BE a better way to do this
+		if( $type == 'xml' ){
+			$out = '<root>';
+			foreach( $result as $key => $val ){
+				$out.= '<' . $key . '>' . $val . '</' . $key . '>';
+			}
+			$out.= '</root>';
+		}
+		elseif( $type = 'json' ){
+			$out = json_encode($result);
+		}
+
+		return $out;
 	}
 }
