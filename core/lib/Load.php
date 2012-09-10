@@ -56,7 +56,7 @@ class Load {
 		}
 
 		// Get controller
-		$C =& get_instance();
+		$Controller =& get_instance();
 
 		// Check for the requested object name they want
 		if( isset($C->$object_name) ){
@@ -67,15 +67,15 @@ class Load {
 		require_once(CORE_LIB_PATH . 'Model.php');
 
 		// Create a new object within the controller object to hold the new model, using the desired name
-		$C->$object_name = $this->_load('model', $file);
+		$Controller->$object_name = $this->_load('model', $file);
 
 		// Store, just in case it gets called again
 		$this->_models[] = $object_name;
 
 		// Which database information to use for database connection?
-		$db_name = ( !empty($C->$object_name->uses) ) ? $C->$object_name->uses : 'default';
+		$db_name = ( !empty($Controller->$object_name->uses) ) ? $Controller->$object_name->uses : 'default';
 
-		$C->$object_name->_init();
+		$Controller->$object_name->_init();
 	}
 
 

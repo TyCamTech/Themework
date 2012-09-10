@@ -10,6 +10,8 @@ class Config {
 	}
 
 	public static function &getInstance(){
+		if( !self::$instance ){ self::$instance = new Config; }
+
 		return self::$instance;
 	}
 

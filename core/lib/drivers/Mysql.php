@@ -79,6 +79,25 @@ class MySQL extends Driver {
 		$this->_response_type = $type;
 	}
 
+	/**
+	 * MySQL::getPrimaryKey()
+	 * Tries to determine the primary key from a specific table and return it
+	 * 
+	 * @param string $table
+	 * @return string (table name)
+	 */
+	public function getPrimaryKey($table = ''){
+		$key = false;
+
+		if( !empty($table) ){
+			$result = $this->query('SHOW KEYS FROM `' . $table . '` WHERE Key_name = "PRIMARY"');
+			if( !empty($result['Column_name']) ){
+				$key = $result['Column_name'];
+			}
+		}
+
+		return $key;
+	}
 
 	/**
 	 * MySQL::query()

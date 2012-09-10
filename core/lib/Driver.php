@@ -9,11 +9,11 @@
  * @copyright 2012
  * @access public
  */
-class Driver {
+abstract class Driver {
 
 	protected $_config;
 
-	private $_select, $_table, $_limit, $_offset, $_order, $_dir, $_where;
+	private $_select, $_table, $_limit, $_offset, $_order, $_dir, $_where, $_key;
 
 	private $_set = array();
 
@@ -66,6 +66,83 @@ class Driver {
 	 */
 	public function _setDriver($driver){
 		$this->_driver = $driver;
+	}
+
+	/**
+	 * Driver::source()
+	 * Sets the table name
+	 * 
+	 * @param string $name
+	 * @return
+	 */
+	public function source($name = ''){
+		if( empty($name) ){ return false; }
+
+		$this->_table = $name;
+	}
+
+	/**
+	 * Driver::primaryKey()
+	 * Sets the primary key, which saves the ->find() method from having to determine it for itself.
+	 * 
+	 * @param string $key
+	 * @return
+	 */
+	public function primaryKey($key = ''){
+		if( empty($key) ){ return false; }
+
+		$this->_key = $key;
+	}
+
+	/**
+	 * Driver::find()
+	 * Find - Used to find records in a database.
+	 * Pass an integer to search against the primary key
+	 * or pass an array with params to modify desired results
+	 * 
+	 * @param mixed $params
+	 * @return mixed
+	 */
+	public function find($params = null){
+		////// Search by Primary Key //////
+		// If it's just a number, search by primary key
+		if( is_numeric($params) ){
+			// Key has been set previously so search using it
+			$key = ( !empty($this->_key) ) ? $this->_key : null;
+
+			// No key set, so try to determine the key using the driver
+			if( empty($key) ){
+				// first, because not all primary keys are named equally, we have to find it.
+				$key = $this->getPrimaryKey($this->_table);
+			}
+
+			// we have a primary key to search against so go
+			if( !empty($key) ){
+				return $this->query('SELECT * FROM `' . $this->_table. '` WHERE `' . $this->_table . '`.' . $key . ' = ' . $params);
+			}
+			else {
+				show_error('Unable to search by primary key because no primary key is set.', 600);
+			}
+		}
+
+		// If the dev didn't pass an array in, we can't use.
+		if( !is_array($params) ){
+			show_error('Invalid search params. You need to pass an array to ->find()', 600);
+		}
+
+		// Break apart the params and use what we find
+		extract($params);
+
+		// Table name. Either it's set or passed in params. If neither, fail out.
+		if( empty($table) && empty($this->_table) ){
+			show_error('No table name set', 600);
+		}
+		else {
+			// Set the table name to one or the other
+			$this->_table ( !empty($table) ) ? $table : $this->_table;
+		}
+
+		
 	}
 
 	public function select($select = ''){

@@ -2,36 +2,15 @@
 if( !function_exists('config') ){
 	/**
 	 * config()
-	 * Grabs a line from the one of the user's config files
+	 * Returns a value from the user's config based on $line'
 	 * 
 	 * @param string $line
-	 * @param string $file
 	 * @return mixed
 	 */
-	function config($line = '', $file = ''){
-		$config =& ThemeWork_config();
-
-		if( !empty($file) ){
-			$config->loadConfig($file);
-		}
+	function config($line = ''){
+		$config = Config::getInstance();
 
 		return $config->item($line);
-
-		/*
-		$C =& get_instance();
-
-		if( !empty($file) ){
-			// Load the config file to ensure it's there and available
-			$C->loadConfig($file);
-		}
-
-		if( !empty($C->_config[$line]) ){
-			return $C->_config[$line];
-		}
-		else {
-			return false;
-		}
-		*/
 	}
 }
 
@@ -185,7 +164,7 @@ if( !function_exists('load_class') ){
 	 * @param string $directory
 	 * @return object
 	 */
-	function load_class($class = '', $directory = ''){
+	function load_class($class = '', $directory = 'lib'){
 		static $_classes = array();
 
 		// Does the class exist?  If so, we're done...

@@ -4,11 +4,12 @@
  * 
  * @package ThemeWork
  * @author Stuart Duncan
- * @copyright 2012
- * @access public
+ * @copyright TyCam Technologies
+ * @license GNU LGPL
  */
 class Controller {
 
+	/** Holds the instance of this class so it may never be instantiated twice **/
 	private static $instance;
 
 	/** The theme - Default is 'default' **/
@@ -27,7 +28,8 @@ class Controller {
 	 * Controller::__construct()
 	 * Called on creation
 	 * 
-	 * @return void
+	 * @access	public
+	 * @return	void
 	 */
 	public function __construct(){
 		// Call this log message here as this is the only class not loaded using the "load_class" function
@@ -36,13 +38,17 @@ class Controller {
 
 		// Load the load class
 		$this->load = load_class('Load', 'lib');
+
+		// This simply makes it possible to call $this->config->item() from any controller
+		$this->config = Config::getInstance();
 	}
 
 	/**
 	 * Controller::getInstance()
 	 * Returns an instance of this class
 	 * 
-	 * @return
+	 * @access	public
+	 * @return	instance of self
 	 */
 	public static function &getInstance(){
 		return self::$instance;
@@ -52,7 +58,7 @@ class Controller {
 	 * Controller::index()
 	 * Default first view ever if there's nothing in 'app' folder
 	 * 
-	 * @return void
+	 * @return	void
 	 */
 	public function index(){
 
@@ -94,8 +100,9 @@ class Controller {
 	 * Controller::doAutoInjection()
 	 * Handle the JS and CSS auto injection as set (or not) in the user's config
 	 * 
-	 * @param string $method
-	 * @return array
+	 * @param	string $method
+	 * @access	public
+	 * @return	array
 	 */
 	public function doAutoInjection($method = 'JS'){
 		// Ensure it's capatlized, even if the developer forgets
@@ -167,9 +174,10 @@ class Controller {
 	 * Controller::set()
 	 * Set data for the templates
 	 * 
-	 * @param mixed $name
-	 * @param mixed $value
-	 * @return void
+	 * @param	mixed	$name
+	 * @param	mixed	$value
+	 * @access	public
+	 * @return	void
 	 */
 	public function set($name = null, $value = null){
 		$this->_variables[$name] = $value;
@@ -179,8 +187,9 @@ class Controller {
 	 * Controller::setTheme()
 	 * Already defaults to 'default' which is set in the core
 	 * 
-	 * @param string $theme
-	 * @return void
+	 * @param	string	$theme
+	 * @access	public
+	 * @return	void
 	 */
 	public function setTheme($theme = ''){
 		if( !empty($theme) ){
@@ -192,7 +201,8 @@ class Controller {
 	 * Controller::getTheme()
 	 * Returns $_theme value
 	 * 
-	 * @return string
+	 * @access	public
+	 * @return	string
 	 */
 	public function getTheme(){
 		return $this->_theme;
@@ -202,9 +212,10 @@ class Controller {
 	 * Controller::view()
 	 * Default view method. This will call call a file and either output or return it's contents
 	 * 
-	 * @param mixed $page
-	 * @param bool $return
-	 * @return mixed
+	 * @param	mixed	$page
+	 * @param	bool	$return
+	 * @access	public
+	 * @return	mixed
 	 */
 	public function view($page = null, $return = false){
 		$path = '';
