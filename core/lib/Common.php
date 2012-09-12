@@ -280,3 +280,19 @@ if( !function_exists('Log_Message') ){
 		Log::add($key, $value);
 	}
 }
+
+if( !function_exists('mtime') ){
+	/**
+	 * mtime()
+	 * All this function does is return the time in microtime
+	 * 
+	 * @return integer
+	 */
+	function mtime(){
+		$mtime = microtime(); 
+		$mtime = explode(" ",$mtime); 
+		$mtime = $mtime[1] + $mtime[0]; 
+
+		return $mtime;
+	}
+}

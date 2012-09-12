@@ -154,16 +154,14 @@ class RequestHandler{
 
 			if( $count == 0 ){
 				$controller = trim($ar);
-				$count++;
 			}
 			elseif( $count == 1 ){
 				$method = trim($ar);
-				$count++;
 			}
 			else {
 				$params[] = trim($ar);
-				$count++;
 			}
+			$count++;
 		}
 
 		$result = array(

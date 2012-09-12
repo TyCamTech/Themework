@@ -51,6 +51,8 @@ if( config('class_prefix') != false ){
  */
 class Core {
 	public function __construct(){
+		// record start time
+		$starttime = mtime(); 
 
 		// Initialize the config info. This will load core/config, app/config and then theme/config, overloading as it goes
 		// as necessary, giving the theme config top priority.
@@ -59,5 +61,37 @@ class Core {
 
 		// Handle requests - Load automagically in the construct
 		$request = load_class('RequestHandler');
+
+		// Record end time
+		$endtime = mtime();
+		// Total load time for the entire framework
+		$totaltime = ($endtime - $starttime);
+		Log_Message('Page Execution Time', $totaltime);
+
+		// If debugging is enabled, show the logs
+		if( config('debug') && function_exists('json_encode') ){
+			// Retrieves the logs and outputs them.
+			//TODO:Have to make this look awesome. Maybe JS pretty?
+			$log = Log::getResult();
+
+			// PHP version 5.3+ has JSON_FORCE_OBJECT which is FAR superior to (object) casting.
+			// Therefore, older versions of PHP will not have proper debugging 
+			if( defined('JSON_FORCE_OBJECT') ){
+				$json = json_encode($log, JSON_FORCE_OBJECT);
+			}
+			else {
+				$json = json_encode((object)$log);
+			}
+			echo '
+			<div id="ThemeWord_debug" class="container" style="margin: 20px auto 50px auto;"></div>
+			<script src=\'' . site_url() . 'core/default/js/prettyPrint.js\'></script>
+			<script>
+			var randomObject = ' . $json . ';
+    		var ppTable = prettyPrint(randomObject, {maxDepth: 10}), debug = document.getElementById(\'ThemeWord_debug\');
+    		debug.innerHTML = \'\';
+    		debug.appendChild(ppTable);
+    		</script>
+ 			';
+		}
 	}
 }
