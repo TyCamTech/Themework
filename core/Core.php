@@ -1,5 +1,20 @@
 <?php
 // Constants
+/*
+ * Environment stages:
+ * development - All errors and warnings
+ * production - Errors and warnings hidden, except for fatal errors
+ */
+define('ENVIRONMENT', 'development');
+
+error_reporting(E_ALL);
+switch(ENVIRONMENT){
+	case 'development':
+		@ini_set('display_errors', true);
+	default:
+		@ini_set('display_errors', false);
+}
+
 // Version. I'll start changing this once I have a framework that can actually be used, even if it's crappy.
 define('VERSION', 0.1);
 

@@ -1,10 +1,5 @@
 <?php
-
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', dirname(dirname(__FILE__)));
 
 # DIR paths to primary components of this Framework.
 define('BASE_PATH', dirname(__FILE__));
